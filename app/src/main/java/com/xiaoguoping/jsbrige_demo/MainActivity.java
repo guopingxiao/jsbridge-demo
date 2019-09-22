@@ -1,28 +1,28 @@
 package com.xiaoguoping.jsbrige_demo;
 
 import android.content.Context;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
-import android.widget.Button;
-import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 
 import wendu.dsbridge.CompletionHandler;
 import wendu.dsbridge.DWebView;
-import wendu.dsbridge.OnReturnValue;
 
 public class MainActivity extends AppCompatActivity {
 
     private MainActivity self = this;
     private DWebView webview;
-    private Button refreshBtn;
-    private Button showBtn;
-    private TextView inputText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,44 +30,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         webview= findViewById(R.id.webView);
-        refreshBtn = findViewById(R.id.refreshBtn);
-        showBtn = findViewById(R.id.showBtn);
-        inputText = findViewById(R.id.inputText);
-
 
         webview.loadUrl("http://192.168.100.153:8080/?timestamp" + new Date().getTime());
 
         // 打开webview执行js代码的权限
         webview.getSettings().setJavaScriptEnabled(true);
-
-
         // DSBridge 注入jsApi
         webview.setWebChromeClient(new WebChromeClient());
         webview.addJavascriptObject(new JSApi(this), null);
 
-        // 刷新页面
-        refreshBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                webview.loadUrl("http://192.168.100.153:8080/?timestamp" + new Date().getTime());
-            }
-        });
 
-        showBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                webview.callHandler("getWebEditValue", null, new OnReturnValue<String>() {
-
-                    @Override
-                    public void onValue(String retValue) {
-                         new AlertDialog.Builder(self)
-                                 .setMessage("web输入值：" + retValue)
-                                 .create()
-                                 .show();
-                    }
-                });
-            }
-        });
     }
 
     /**
@@ -85,9 +57,31 @@ public class MainActivity extends AppCompatActivity {
          * @param handler 回调方法
          */
         @JavascriptInterface
-        public void getNativeEditValue(Object params, CompletionHandler<String> handler){
-            String value = ((MainActivity)ctx).inputText.getText().toString();
-            handler.complete(value);
+        public void nativeHttp(Object params, CompletionHandler<String> handler){
+            try {
+                String url = ((JSONObject)params).getString("url");
+                String data = request(url);
+                handler.complete(data);
+            } catch (JSONException e) {
+                handler.complete(e.getMessage());
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        private String request(String urlSpec) throws Exception{
+            HttpURLConnection connection = (HttpURLConnection )new URL(urlSpec).openConnection();
+            connection.setRequestMethod("GET");
+            InputStream inputStream = connection.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer buffer = new StringBuffer();
+            String line;
+            while ((line = reader.readLine()) != null){
+                buffer.append(line);
+            }
+
+            return buffer.toString();
         }
     }
 

@@ -11,27 +11,30 @@
       }
     </style>
     <script>
-        //注册 javascript API 
-        dsBridge.register('getWebEditValue',()=>{
-            const inputText = document.querySelector('#inputText')
-            return inputText.value
-        })
         document.addEventListener('DOMContentLoaded', e =>{
-          const showBtn = document.querySelector('#showBtn')
-          showBtn.addEventListener('click', e=>{
-            dsBridge.call('getNativeEditValue', '', value=>{
-              window.alert('Natvie 输入值:' + value)
-            })
+          const requestBtn = document.querySelector('#requestBtn')
+          const url = document.querySelector('#urlText').value.trim()
+          const responseText = document.querySelector('#response')
+          requestBtn.addEventListener('click', e=>{
+            if(url){
+              responseText.textContent = ''
+              dsBridge.call('nativeHttp', {url}, data =>{
+                  responseText.textContent = data
+              })
+            }
+            
           })
         })
     </script>
   </head>
   <body>
     <div>
-      <input id="inputText" type="text" placeholder="输入内容" />
+      <input id="urlText" type="text" value="http://www.dianping.com" />
+      <button id="requestBtn">获取数据</button>
     </div>
     <div>
-      <button id="showBtn">获取native回调信息</button>
+      <p>请求返回内容：</p>
+      <p id="response"></p>
     </div>
   </body>
 </html>
