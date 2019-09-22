@@ -1,8 +1,12 @@
 package com.xiaoguoping.jsbrige_demo;
 
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 
@@ -38,8 +42,35 @@ public class MainActivity extends AppCompatActivity {
         // DSBridge 注入jsApi
         webview.setWebChromeClient(new WebChromeClient());
         webview.addJavascriptObject(new JSApi(this), null);
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //Native 的color格式是ARGB  web的是RGBA
+        changeTheme(0xFFFF6633);
+        return true;
+    }
+
+    // 换肤功能
+    private void changeTheme(int color){
+        // 状态栏
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        getWindow().setStatusBarColor(color);
+
+        // 标题栏
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(color));
+
+        // 导航栏
+        getWindow().setNavigationBarColor(color);
+
+        // web网页背景
+        webview.callHandler("changeTheme", new Object[]{color});
     }
 
     /**

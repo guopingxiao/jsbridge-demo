@@ -25,6 +25,9 @@
             
           })
         })
+        dsBridge.register("changeTheme", color=>{
+          document.body.style.backgroundColor = "#" + (color & 0x00FFFFFF).toString(16)
+        })
     </script>
   </head>
   <body>
