@@ -25,16 +25,9 @@
             android:layout_height="wrap_content"
             android:hint="输入内容"
             android:textSize="30sp"/>
-        
-        <Button
-            android:id="@+id/showBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:text="Native调用JS"/>
 
         <Button
-            android:id="@+id/showBtn2"
+            android:id="@+id/showBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="30sp"
