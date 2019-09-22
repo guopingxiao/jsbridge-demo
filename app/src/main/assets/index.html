@@ -1,0 +1,64 @@
+<!DOCTYPE html><!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>jsbridge</title>
+    <style>
+      * {
+        font-size: 30px;
+      }
+    </style>
+    <script>
+        let callbackId = 0
+        const callBackMap ={}
+        window.JSSDK={
+          getNativeEditTextValue:(callback)=>{
+            callBackMap[callbackId] = callback
+            NativeBridge.getNativeEditTextValue(callbackId)
+            callback ++
+          },
+          receiveMessage: (callbackId, data) => {
+            if(callBackMap[callbackId]){
+              callBackMap[callbackId](data)
+            }
+          },
+          getWebEditValue:(callbackId)=>{
+            const inputText = document.querySelector('#inputText')
+            const value = inputText.value
+            NativeBridge.recieveMessage(callbackId, value)
+          }
+        }
+        window.showWebDialog = (text) =>{window.alert(text)}
+        window.addEventListener('DOMContentLoaded', e =>{
+          const inputText = document.querySelector('#inputText')
+          const showBtn = document.querySelector('#showBtn')
+          const showBtn2 = document.querySelector('#showBtn2')
+          showBtn.addEventListener('click',e=>{
+            const inputVal = inputText.value;
+            showNativeDialog(inputVal)
+          })
+          showBtn2.addEventListener('click',e=>{
+            window.JSSDK.getNativeEditTextValue(value =>{
+              window.alert(`Native输入值: ${value}`)
+            })
+          })
+          
+        })
+
+        function showNativeDialog(text){
+          // window.alert(`jsbridge://showNativeDialog?text=${text}`)
+          window.NativeBridge.showNativeDialog(text)
+        }
+    </script>
+  </head>
+  <body>
+    <div>
+      <input id="inputText" type="text" placeholder="输入内容" />
+    </div>
+    <div>
+      <button id="showBtn">JS调用Natvie</button>
+      <button id="showBtn2">获取native回调信息</button>
+    </div>
+  </body>
+</html>
